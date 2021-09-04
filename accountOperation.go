@@ -3,24 +3,30 @@ package accountOperation
 import (
 	"fmt"
 	"sync"
+	"github.com/shopspring/decimal"
 )
 
 var (
 	mutex sync.Mutex
 )
-func Withdraw(amountOfWithdraw int, amount int, wg *sync.WaitGroup) {
-	mutex.Lock()
-	amount -= amountOfWithdraw
-	mutex.Unlock()
-	wg.Done(); // Decrease 1 value count of goroutines
-	fmt.Printf("New balance is %d \n", amount)
+
+type Account struct {
+	Balance decimal.Decimal 
 }
 
-func Deposit(amountOfDeposit int, amount int, wg *sync.WaitGroup) {
+func Withdraw(amountOfWithdraw decimal.Decimal, a *Account, wg *sync.WaitGroup) {
+	mutex.Lock()	
+	a.Balance = a.Balance.Sub(amountOfWithdraw)
+	mutex.Unlock()
+	wg.Done(); // Decrease 1 value count of goroutines
+	fmt.Printf("New balance is %s \n", a.Balance.StringFixed(3))
+}
+
+func Deposit(amountOfDeposit decimal.Decimal, a *Account, wg *sync.WaitGroup) {
 	mutex.Lock()
-	amount += amountOfDeposit
+	a.Balance = a.Balance.Add(amountOfDeposit)
 	mutex.Unlock()
 	wg.Done() // Decrease 1 value count of goroutines
-	fmt.Printf("New balance is %d \n", amount)
+	fmt.Printf("New balance is %s \n", a.Balance.StringFixed(3))
 }
 
